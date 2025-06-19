@@ -2,7 +2,7 @@
 
 * Transfroming smiles into .xyz and calculating descirptors for XC functionals optimization
 * Mechine Learning Model for XC functionals optimization when calculating the charge-transfer excited or local excited state in TDDFT
-* Script fo batch generation of Gaussian tasks before and after optimization 
+* Scripts for batch generation of Gaussian tasks before and after optimization 
 
 ## How To Use
 
