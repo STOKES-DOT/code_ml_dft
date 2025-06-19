@@ -679,7 +679,7 @@ joblib.dump(final_elasticnet_model, 'final_elasticnet_wb97xd.pkl')
 
 # 定义基学习器
 xgb_reg = XGBRegressor(**best_params_xgb)
-lgb_reg = LGBMRegressor(**best_params_lgb)
+lgb_reg = LGBMRegressor(**best_params_lgb,force_col_wise=True)
 gbm_reg = GradientBoostingRegressor(**best_params_gbr)
 rf_reg = RandomForestRegressor(**best_params_rf)
 cat_reg = CatBoostRegressor(**best_params_catboost, verbose=0)  # 设置 verbose=0 避免日志输出
