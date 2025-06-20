@@ -52,7 +52,7 @@ logging.getLogger('lightgbm').setLevel(logging.ERROR)
 optuna.logging.set_verbosity(optuna.logging.CRITICAL)
 
 
-Trainning_data = pd.read_csv(r'/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_ωB97XD/train_date/training_date_ωB97XD.csv')
+Trainning_data = pd.read_csv(r'/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/train_date/training_date_wB97XD.csv')
 Trainning_data.drop_duplicates(inplace=True)
 Trainning_data.dropna(inplace=True)
 
@@ -185,7 +185,7 @@ scaler = StandardScaler()
 x_train[numeric_features] = scaler.fit_transform(x_train[numeric_features])
 # 假设 x_test 也已经定义
 x_test[numeric_features] = scaler.transform(x_test[numeric_features])
-joblib.dump(scaler, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_ωB97XD/Stacking_model/scaler_wb97xd.pkl')
+joblib.dump(scaler, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/scaler_wb97xd.pkl')
 
 def objective_xgb(trial):
     params = {
@@ -235,7 +235,7 @@ final_model.fit(x_train, y_train)
 y_pred = final_model.predict(x_test)
 test_mse = mean_squared_error(y_test, y_pred)
 print(f"Test MSE with Best Model: {test_mse}")
-joblib.dump(final_model, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_ωB97XD/Stacking_model/final_xgb_wb97xd.pkl')
+joblib.dump(final_model, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_xgb_wb97xd.pkl')
 
 
 
@@ -296,7 +296,7 @@ final_model.fit(x_train, y_train)
 y_pred = final_model.predict(x_test)
 test_mse = mean_squared_error(y_test, y_pred)
 print(f"Test MSE with Best Model: {test_mse}")
-joblib.dump(final_model, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_ωB97XD/Stacking_model/final_lgb_wb97xd.pkl')
+joblib.dump(final_model, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_lgb_wb97xd.pkl')
 
 
 
@@ -345,7 +345,7 @@ final_model.fit(x_train, y_train)
 y_pred = final_model.predict(x_test)
 test_mse = mean_squared_error(y_test, y_pred)
 print(f"Test MSE with Best Model: {test_mse}")
-joblib.dump(final_model, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_ωB97XD/Stacking_model/final_gbr_wb97xd.pkl')
+joblib.dump(final_model, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_gbr_wb97xd.pkl')
 # 定义目标函数
 def objective_lasso(trial):
     # 定义超参数搜索空间
@@ -401,7 +401,7 @@ final_model.fit(x_train, y_train)
 y_pred = final_model.predict(x_test)
 test_mse = mean_squared_error(y_test, y_pred)
 print(f"Test MSE with Best Lasso Model: {test_mse}")
-joblib.dump(final_model, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_ωB97XD/Stacking_model/final_lasso_wb97xd.pkl')
+joblib.dump(final_model, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_lasso_wb97xd.pkl')
 
 # 定义目标函数
 def objective_catboost(trial):
@@ -463,7 +463,7 @@ final_model.fit(x_train, y_train)
 y_pred = final_model.predict(x_test)
 test_mse = mean_squared_error(y_test, y_pred)
 print(f"Test MSE with Best CatBoost Model: {test_mse}")
-joblib.dump(final_model, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_ωB97XD/Stacking_model/final_catboost_wb97xd.pkl')
+joblib.dump(final_model, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_catboost_wb97xd.pkl')
 # 定义目标函数
 def objective_adaboost(trial):
     params = {
@@ -583,7 +583,7 @@ final_model.fit(x_train, y_train)
 y_pred = final_model.predict(x_test)
 test_mse = mean_squared_error(y_test, y_pred)
 print(f"Test MSE with Best Random Forest Model: {test_mse}")
-joblib.dump(final_model, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_ωB97XD/Stacking_model/final_rf_wb97xd.pkl')
+joblib.dump(final_model, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_rf_wb97xd.pkl')
 
 # 定义目标函数（Lasso）
 def objective_ridge(trial):
@@ -630,7 +630,7 @@ final_ridge_model.fit(x_train, y_train)
 ridge_y_pred = final_ridge_model.predict(x_test)
 ridge_test_mse = mean_squared_error(y_test, ridge_y_pred)
 print(f"Test MSE with Best Ridge Model: {ridge_test_mse}")
-joblib.dump(final_ridge_model, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_ωB97XD/Stacking_model/final_ridge_wb97xd.pkl')
+joblib.dump(final_ridge_model, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_ridge_wb97xd.pkl')
 def objective_elasticnet(trial):
     params = {
         'alpha': trial.suggest_loguniform('alpha', 1e-60, 1.0),  # 正则化强度
@@ -675,7 +675,7 @@ final_elasticnet_model.fit(x_train, y_train)
 elasticnet_y_pred = final_elasticnet_model.predict(x_test)
 elasticnet_test_mse = mean_squared_error(y_test, elasticnet_y_pred)
 print(f"Test MSE with Best ElasticNet Model: {elasticnet_test_mse}")
-joblib.dump(final_elasticnet_model, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_ωB97XD/Stacking_model/final_elasticnet_wb97xd.pkl')
+joblib.dump(final_elasticnet_model, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_elasticnet_wb97xd.pkl')
 
 # 定义基学习器
 xgb_reg = XGBRegressor(**best_params_xgb)
@@ -808,7 +808,7 @@ final_stacking_regressor = StackingRegressor(
 
 # 训练最终的堆叠回归器
 final_stacking_regressor.fit(x_train, y_train)
-joblib.dump(final_stacking_regressor, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_ωB97XD/Stacking_model/final_stacking_wb97xd.pkl')
+joblib.dump(final_stacking_regressor, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_stacking_wb97xd.pkl')
 
 
 results = []

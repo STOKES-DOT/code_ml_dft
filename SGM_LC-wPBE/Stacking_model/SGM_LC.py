@@ -49,7 +49,7 @@ import re
 from scipy.stats import pearsonr
 
 
-Trainning_data = pd.read_csv(r'/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_ωB97XD/train_date/training_date_wb97xd.csv')
+Trainning_data = pd.read_csv(r'/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-ωPBE/train_date/training_date_LC-ωPBE.csv')
 Trainning_data.drop_duplicates(inplace=True)
 Trainning_data.dropna(inplace=True)
 
@@ -171,19 +171,19 @@ x_train_final = pd.concat([x_train, x_train_interpolated], axis=0).reset_index(d
 y_train_final = pd.concat([y_train, y_train_interpolated], axis=0).reset_index(drop=True)
 
 
-scaler = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_ωB97XD/Stacking_model/scaler_wb97xd.pkl')
+scaler = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-wPBE/Stacking_model/scaler_LC.pkl')
 x_train[numeric_features] = scaler.transform(x_train[numeric_features])
 x_test[numeric_features] = scaler.transform(x_test[numeric_features])
 
-xgb_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_ωB97XD/Stacking_model/final_xgb_model_wb97xd.pkl')
-lgbm_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_ωB97XD/Stacking_model/final_lgb_model_wb97xd.pkl')
-cat_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_ωB97XD/Stacking_model/final_catboost_model_wb97xd.pkl')
-gbr_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_ωB97XD/Stacking_model/final_gbr_model_wb97xd.pkl')
-rf_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_ωB97XD/Stacking_model/final_rf_model_wb97xd.pkl')
-ada_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_ωB97XD/Stacking_model/final_adaboost_model_wb97xd.pkl')
-lasso_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_ωB97XD/Stacking_model/final_lasso_model_wb97xd.pkl')
-ridge_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_ωB97XD/Stacking_model/final_ridge_model_wb97xd.pkl')
-elastic_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_ωB97XD/Stacking_model/final_elasticnet_model_wb97xd.pkl')
+xgb_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-wPBE/Stacking_model/final_xgb_model_LC.pkl')
+lgbm_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-wPBE/Stacking_model/final_lgb_model_LC.pkl')
+cat_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-wPBE/Stacking_model/final_catboost_model_LC.pkl')
+gbr_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-wPBE/Stacking_model/final_gbr_model_LC.pkl')
+rf_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-wPBE/Stacking_model/final_rf_model_LC.pkl')
+ada_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-wPBE/Stacking_model/final_adaboost_model_LC.pkl')
+lasso_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-wPBE/Stacking_model/final_lasso_model_LC.pkl')
+ridge_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-wPBE/Stacking_model/final_ridge_model_LC.pkl')
+elastic_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-wPBE/Stacking_model/final_elasticnet_model_LC.pkl')
 
 base_learners = [
     ("XGBoost", xgb_regressor),
@@ -294,7 +294,7 @@ final_stacking_regressor = StackingRegressor(
 
 # 训练最终的堆叠回归器
 final_stacking_regressor.fit(x_train, y_train)
-joblib.dump(final_stacking_regressor, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_ωB97XD/Stacking_model/final_stacking_model_wb97xd.pkl')
+joblib.dump(final_stacking_regressor, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-wPBE/Stacking_model/final_stacking_model_LC.pkl')
 results = []
 
 # 定义函数用于计算指标
