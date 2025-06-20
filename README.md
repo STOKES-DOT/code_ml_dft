@@ -18,7 +18,9 @@ $ cd code_ml_dft
 ```
 
 > **Note**
-> If you're using Linux Bash for Windows, [see this guide](https://www.howtogeek.com/261575/how-to-run-graphical-linux-desktop-applications-from-windows-10s-bash-shell/) or use `node` from the command prompt.
+> Here, We give two XC funationals optimization code. If you want to create more codes for optimizing different XC functionals, Please refer to our article in XXX (Will be pulished in a few time). 
+> The final stacking model is not training because of the limit in Github's storage space. You need to finish training it by youself.
+> The packge needed for training stacking model is listed in packge.txt.
 
 
 ## Download
