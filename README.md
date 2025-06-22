@@ -19,7 +19,7 @@ $ cd code_ml_dft
 
 > **Note**
 > Here, We give two XC funationals optimization code. If you want to create a new model for optimizing other XC functional, Please refer to our article in XXX (Will be pulished in a few time). 
-> The final stacking model is not training because of the limit in Github's storage space. You need to finish training it by youself. Besides, each base-learners could also be used for optimization with a lower porfromeance.
+> The final stacking model is not training because of the limit in Github's storage space. You need to finish training it by youself. Besides, each base-learners could also be used for optimization with a lower performance.
 > The packge needed for training stacking model is listed in packge.txt.
 
 ## Email
