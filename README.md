@@ -24,7 +24,7 @@ $ cd code_ml_dft
 
 ## Email
 
-if you liked using this model or it has any questions about these codes or our theory details, I'd like you send me an email at <jiaoyuan24@mails.ucas.ac.cn> about anything you'd want to say about these codes. I'd really appreciate it!
+If you liked using this model or it has any questions about these codes or our theory details, I'd like you send me an email at <jiaoyuan24@mails.ucas.ac.cn> about anything you'd want to say about these codes. I'd really appreciate it!
 
 ## Credits
 
