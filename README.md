@@ -19,12 +19,12 @@ $ cd code_ml_dft
 
 > **Note**
 > Here, We give two XC funationals optimization code. If you want to create a new model for optimizing other XC functional, Please refer to our article in XXX (Will be pulished in a few time). 
-> The final stacking model is not training because of the limit in Github's storage space. You need to finish training it by youself. Besides, each base-learners could also be used for optimization with a lower porfromeance.
+> The final stacking model is not training because of the limit in Github's storage space. You need to finish training it by youself. Besides, each base-learners could also be used for optimization with a lower performance.
 > The packge needed for training stacking model is listed in packge.txt.
 
 ## Email
 
-if you liked using this model or it has any questions about these codes or our theory details, I'd like you send me an email at <jiaoyuan24@mails.ucas.ac.cn> about anything you'd want to say about these codes. I'd really appreciate it!
+If you liked using this model or it has any questions about these codes or our theory details, I'd like you send me an email at <jiaoyuan24@mails.ucas.ac.cn> about anything you'd want to say about these codes. I'd really appreciate it!
 
 ## Credits
 
@@ -55,11 +55,8 @@ If you like this project and think it has helped in any way, consider buying me 
 
 ## License
 
-MIT
+UCAS,SAIS
 
 ---
 
-> [amitmerchant.com](https://www.amitmerchant.com) &nbsp;&middot;&nbsp;
-> GitHub [@amitmerchant1990](https://github.com/amitmerchant1990) &nbsp;&middot;&nbsp;
-> Twitter [@amit_merchant](https://twitter.com/amit_merchant)
 
