@@ -16,7 +16,17 @@ $ git clone https://github.com/STOKES-DOT/code_ml_dft
 $ cd code_ml_dft
 
 ```
+## XC functionals optimization
 
+To optimize the XC functionals of a given molecule, you can use the following code in example folder:
+
+```bash
+# Go into the example folder
+$ cd example
+
+# Run the optimization code
+$ python optimize_xc.py --smiles "C" --xc "LC-wPBE" --basis "6-31G"
+```
 > **Note**
 > Here, We give two XC funationals optimization code. If you want to create a new model for optimizing other XC functional, Please refer to our article in XXX (Will be pulished in a few time). 
 > The final stacking model is not training because of the limit in Github's storage space. You need to finish training it by youself. Besides, each base-learners could also be used for optimization with a lower performance.
@@ -28,30 +38,17 @@ If you liked using this model or it has any questions about these codes or our t
 
 ## Credits
 
-This software uses the following open source packages:
+This code uses the following open source packages (We have listed in the project. You can install them accroding to your need.):
 
-- [Electron](http://electron.atom.io/)
-- [Node.js](https://nodejs.org/)
-- [Marked - a markdown parser](https://github.com/chjj/marked)
-- [showdown](http://showdownjs.github.io/showdown/)
-- [CodeMirror](http://codemirror.net/)
-- Emojis are taken from [here](https://github.com/arvida/emoji-cheat-sheet.com)
-- [highlight.js](https://highlightjs.org/)
-
-## Related
-
-[Try Web version of Markdownify](https://notepad.js.org/markdown-editor/)
 
 ## Support
 
-If you like this project and think it has helped in any way, consider buying me a coffee!
+If you like this project and think it has helped in any way, Sent me 2.5$ for a cup of coffee! Just a joke, but it's always nice to give back to the community. Have a great day!
 
-<a href="https://buymeacoffee.com/amitmerchant" target="_blank"><img src="app/img/bmc-button.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
 
-## You may also like...
+## DFT computational program for strong correlation system based on neural network
 
-- [Pomolectron](https://github.com/amitmerchant1990/pomolectron) - A pomodoro app
-- [Correo](https://github.com/amitmerchant1990/correo) - A menubar/taskbar Gmail App for Windows and macOS
+This project is just an idea. We will keep updating it in the future. If you have any questions or suggestions, please feel free to contact me.
 
 ## License
 
