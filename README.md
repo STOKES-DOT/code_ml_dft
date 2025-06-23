@@ -1,8 +1,8 @@
 ## Key Functions
 
-* Transfroming smiles into .xyz and calculating descirptors for XC functionals optimization
-* Mechine Learning Model for XC functionals optimization when calculating the charge-transfer excited or local excited state of singe molecular systems in TDDFT
-* Scripts for batch generation of Gaussian tasks before and after optimization 
+* Transforming SMILES into .xyz and calculating descriptors for XC functionals optimization
+* Machine Learning Model for XC functionals optimization when calculating the charge-transfer excited or local excited state of singe molecular systems in TDDFT
+* Scripts for batch generation of Gaussian tasks before and after optimization of XC functionals
 
 ## How To Use
 
@@ -24,9 +24,12 @@ To optimize the XC functionals of a given molecule, you can use the following co
 # Go into the example folder
 $ cd example
 
-# Run the optimization code
-$ python optimize_xc.py --smiles "C" --xc "LC-wPBE" --basis "6-31G"
+# You can use the following code to optimize the XC functionals of a given molecule with a given initial guess
+$ python optimize_xc.py --smiles "C" --xc "LC-wPBE" --basis "6-31G" --initial_guess "LC-wPBE"
+
 ```
+## Transforming SMILES into .xyz and calculating descriptors for XC functionals optimization
+This code will generate a .xyz file for the given molecule, and then optimize the XC functionals using the given initial guess. The optimized XC functionals will be saved in the same folder with the initial guess.
 > **Note**
 > Here, We give two XC funationals optimization code. If you want to create a new model for optimizing other XC functional, Please refer to our article in XXX (Will be pulished in a few time). 
 > The final stacking model is not training because of the limit in Github's storage space. You need to finish training it by youself. Besides, each base-learners could also be used for optimization with a lower performance.
@@ -46,7 +49,7 @@ This code uses the following open source packages (We have listed in the project
 If you like this project and think it has helped in any way, Sent me 2.5$ for a cup of coffee! Just a joke, but it's always nice to give back to the community. Have a great day!
 
 
-## DFT computational program for strong correlation system based on neural network
+## DFT computational program for strongly correlated system based on neural network
 
 This project is just an idea. We will keep updating it in the future. If you have any questions or suggestions, please feel free to contact me.
 
