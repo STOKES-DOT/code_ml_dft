@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Feb  1 22:09:40 2025
-
-@author: 26607
-"""
-
 import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import AllChem
@@ -24,13 +17,13 @@ import py3Dmol
 import joblib
 
 # 读取 Excel 文件
-excel_file = r'xyz_maker\SMILES.csv'  # 替换为你的 Excel 文件路径
-df = pd.read_csv(excel_file)
+csv_file = r'xyz_maker\SMILES.csv'  # 替换为你的 Excel 文件路径
+df = pd.read_csv(csv_file)
 
 # 假设 SMILES 字符串在列名为 'SMILES' 的列中
 smiles_column = 'SMILES'
 smiles_list = df[smiles_column].tolist()
-
+print(f'Total {len(smiles_list)} SMILES strings.')
 # 创建一个空的 DataFrame 用于存储结果
 results = pd.DataFrame(columns=[
     'SMILES', 'PMI1', 'PMI2', 'PMI3', 
@@ -100,44 +93,54 @@ def compute_projection_area(mol):
 for index, row in df.iterrows():
     smiles = row[smiles_column]
     mol = Chem.MolFromSmiles(smiles)
+    
+    # 检查 mol 是否为 None
+    if mol is None:
+        print(f"Invalid SMILES string at row {index}: {smiles}")
+        continue
+    
     mol = Chem.AddHs(mol)
-    if mol is not None:
-        # 生成分子的 3D 坐标
-        AllChem.EmbedMolecule(mol)
-        
+    
+    # 生成分子的 3D 结构
+    try:
+        AllChem.EmbedMolecule(mol, randomSeed=42)  # 使用随机种子确保一致性
+        AllChem.UFFOptimizeMolecule(mol)  # 优化 3D 结构
+    except:
+        print(f"Could not generate 3D structure for molecule at row {index}: {smiles}")
+        continue
         # 计算 3D 描述符
-        pmi1 = Descriptors3D.PMI1(mol)
-        pmi2 = Descriptors3D.PMI2(mol)
-        pmi3 = Descriptors3D.PMI3(mol)
+    pmi1 = Descriptors3D.PMI1(mol)
+    pmi2 = Descriptors3D.PMI2(mol)
+    pmi3 = Descriptors3D.PMI3(mol)
         
         # 计算平面性描述符
-        planar_rmsd = compute_planar_rmsd(mol)
-        inertia_ratio = compute_inertia_ratio(mol)
-        max_planar_deviation = compute_max_planar_deviation(mol)
-        conjugated_ratio = compute_conjugated_ratio(mol)
+    planar_rmsd = compute_planar_rmsd(mol)
+    inertia_ratio = compute_inertia_ratio(mol)
+    max_planar_deviation = compute_max_planar_deviation(mol)
+    conjugated_ratio = compute_conjugated_ratio(mol)
         
         # 计算三维取向描述符
-        principal_axes = compute_principal_axes(mol)
-        projection_area_ratio = compute_projection_area(mol)
+    principal_axes = compute_principal_axes(mol)
+    projection_area_ratio = compute_projection_area(mol)
 
         # 计算 Gasteiger 电荷
-        AllChem.ComputeGasteigerCharges(mol)
-        gast_charges = [atom.GetDoubleProp('_GasteigerCharge') for atom in mol.GetAtoms()]
-        gast_charge_mean = np.mean(gast_charges)
-        gast_charge_std = np.std(gast_charges)
+    AllChem.ComputeGasteigerCharges(mol)
+    gast_charges = [atom.GetDoubleProp('_GasteigerCharge') for atom in mol.GetAtoms()]
+    gast_charge_mean = np.mean(gast_charges)
+    gast_charge_std = np.std(gast_charges)
 
         # 计算电拓扑状态（E-State）
-        estate_indices = EState.EStateIndices(mol)
-        estate_mean = np.mean(estate_indices)
-        estate_std = np.std(estate_indices)
+    estate_indices = EState.EStateIndices(mol)
+    estate_mean = np.mean(estate_indices)
+    estate_std = np.std(estate_indices)
 
         # 计算摩尔折射率（MolMR）
-        mol_mr = Descriptors.MolMR(mol)
+    mol_mr = Descriptors.MolMR(mol)
         #计算拓扑极性表面积TPSA
-        tpsa=Descriptors.TPSA(mol)
+    tpsa=Descriptors.TPSA(mol)
 
         # 将结果存储到 DataFrame 中
-        result_row = pd.DataFrame({
+    result_row = pd.DataFrame({
             'SMILES': [smiles],
             'PMI1': [pmi1],
             'PMI2': [pmi2],
@@ -159,12 +162,11 @@ for index, row in df.iterrows():
         })
         
         # 使用 pd.concat 合并结果
-        results = pd.concat([results, result_row], ignore_index=True)
-    else:
-        print(f"Invalid SMILES string at row {index}: {smiles}")
+    results = pd.concat([results, result_row], ignore_index=True)
+
 
 # 保存结果到新的 Excel 文件
-results.to_excel(r'discrepors_maker\molecules_results.xlsx', index=False)
+results.to_excel(r'descriptors_maker\molecules_results_1.xlsx', index=False)
 
 print("Processing complete. Results saved to 'molecules_results.xlsx'.")
 
@@ -188,20 +190,20 @@ fingerprints_df = pd.DataFrame([list(map(int, fp)) for fp in fingerprints])
 
 # 使用 PCA 进行降维
 #pca = PCA(n_components=50)  # 首先降维到 50 维
-loaded_pca = joblib.load('discrepors_maker\pca_model.joblib')
+loaded_pca = joblib.load('descriptors_maker\pca_model.joblib')
 fingerprints_pca = loaded_pca.transform(fingerprints_df)
 
 d = 10
-# 使用 UMAP 进一步降维到 2 维
 umap_model = umap.UMAP(n_components=d)
 fingerprints_umap = umap_model.fit_transform(fingerprints_pca)
-
+joblib.dump(umap_model, r'descriptors_maker\umap_model.joblib')
 for i in range(d):
     df[f"UMAP{i+1}"] = fingerprints_umap[:, i]
 
 # 保存结果到新的 Excel 文件
-df.to_excel(r'discrepors_maker\molecules_results_1.xlsx', index=False)
+df.to_excel(r'descriptors_maker\molecules_results_2.xlsx', index=False)
 
+print("Processing complete. Results saved to 'molecules_results_2.xlsx'.")
 print("Processing complete. Results saved to 'molecules_results_1.xlsx'.")
 numeric_columns = results.select_dtypes(include='number')
 
