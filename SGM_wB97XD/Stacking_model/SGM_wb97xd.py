@@ -49,7 +49,7 @@ import re
 from scipy.stats import pearsonr
 
 
-Trainning_data = pd.read_csv(r'/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_ωB97XD/train_date/training_date_wb97xd.csv')
+Trainning_data = pd.read_csv(r'/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/train_date/training_date_wb97xd.csv')
 Trainning_data.drop_duplicates(inplace=True)
 Trainning_data.dropna(inplace=True)
 
@@ -175,15 +175,15 @@ scaler = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/St
 x_train[numeric_features] = scaler.transform(x_train[numeric_features])
 x_test[numeric_features] = scaler.transform(x_test[numeric_features])
 
-xgb_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_xgb_model_wb97xd.pkl')
-lgbm_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_lgb_model_wb97xd.pkl')
-cat_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_catboost_model_wb97xd.pkl')
-gbr_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_gbr_model_wb97xd.pkl')
-rf_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_rf_model_wb97xd.pkl')
-ada_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_adaboost_model_wb97xd.pkl')
-lasso_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_lasso_model_wb97xd.pkl')
-ridge_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_ridge_model_wb97xd.pkl')
-elastic_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_elasticnet_model_wb97xd.pkl')
+xgb_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_xgb_wb97xd.pkl')
+lgbm_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_lgb_wb97xd.pkl')
+cat_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_catboost_wb97xd.pkl')
+gbr_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_gbr_wb97xd.pkl')
+rf_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_rf_wb97xd.pkl')
+ada_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_adaboost_wb97xd.pkl')
+lasso_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_lasso_wb97xd.pkl')
+ridge_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_ridge_wb97xd.pkl')
+elastic_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_elasticnet_wb97xd.pkl')
 
 base_learners = [
     ("XGBoost", xgb_regressor),
