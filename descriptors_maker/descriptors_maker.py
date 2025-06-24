@@ -5,20 +5,29 @@ from rdkit import Chem
 from rdkit.Chem import AllChem, Descriptors, Descriptors3D, EState
 from scipy.spatial import ConvexHull
 from sklearn.decomposition import PCA
-from sklearn.decomposition import PCA
 import umap
+import os
+import math
 
 class MolecularDescriptorCalculator:
-    def __init__(self, pca_model_path=r'descriptors_maker\pca_model.joblib', umap_model_path=r'descriptors_maker\umap_model.joblib'):
+    def __init__(self, 
+                 pca_model_path='pca_model.joblib', 
+                 umap_model_path='umap_model.joblib',
+                 xyz_output_dir='xyz_molecules'):
         """
         分子描述符计算器
         
         参数:
         pca_model_path: PCA模型文件路径
         umap_model_path: UMAP模型文件路径
+        xyz_output_dir: XYZ文件输出目录
         """
         self.pca_model = joblib.load(pca_model_path)
         self.umap_model = joblib.load(umap_model_path)
+        self.xyz_output_dir = xyz_output_dir
+        
+        # 确保输出目录存在
+        os.makedirs(self.xyz_output_dir, exist_ok=True)
     
     @staticmethod
     def _compute_planar_rmsd(mol):
@@ -78,12 +87,26 @@ class MolecularDescriptorCalculator:
             areas.append(hull.volume)  # 在2D中volume即为面积
         return np.argmax(areas)  # 返回最大投影平面的索引
     
-    def _calculate_3D_descriptors(self, mol):
-        """计算3D结构描述符"""
+    def _generate_3d_structure(self, mol):
+        """为分子生成3D结构并保存为XYZ文件"""
         # 添加氢原子并生成3D坐标
         mol = Chem.AddHs(mol)
-        AllChem.EmbedMolecule(mol)
+        state = AllChem.EmbedMolecule(mol, useRandomCoords=True)
+        if state == -1:
+            raise RuntimeError("Failed to generate 3D coordinates for molecule")
         
+        # 优化分子
+        AllChem.MMFFOptimizeMolecule(mol)
+        return mol
+    
+    def _save_xyz_file(self, mol, index):
+        """将分子保存为XYZ文件"""
+        filename = os.path.join(self.xyz_output_dir, f"job_{index+1}.xyz")
+        Chem.MolToXYZFile(mol, filename)
+        return filename
+    
+    def _calculate_3D_descriptors(self, mol):
+        """计算3D结构描述符"""
         # 计算3D描述符
         pmi1 = Descriptors3D.PMI1(mol)
         pmi2 = Descriptors3D.PMI2(mol)
@@ -149,12 +172,14 @@ class MolecularDescriptorCalculator:
         
         return umap_dict
     
-    def calculate_descriptors(self, smiles):
+    def calculate_descriptors(self, smiles, index=None, save_xyz=True):
         """
         计算所有分子描述符
         
         参数:
         smiles: SMILES字符串
+        index: 分子索引（用于文件名）
+        save_xyz: 是否保存XYZ文件
         
         返回:
         包含所有描述符的字典
@@ -164,8 +189,16 @@ class MolecularDescriptorCalculator:
         if mol is None:
             raise ValueError(f"无效的SMILES字符串: {smiles}")
         
+        # 生成3D结构
+        mol_3d = self._generate_3d_structure(mol)
+        
+        # 保存XYZ文件
+        xyz_filename = None
+        if save_xyz and index is not None:
+            xyz_filename = self._save_xyz_file(mol_3d, index)
+        
         # 计算3D描述符
-        descriptors_3d = self._calculate_3D_descriptors(mol)
+        descriptors_3d = self._calculate_3D_descriptors(mol_3d)
         
         # 计算UMAP描述符
         descriptors_umap = self._calculate_umap_descriptors(smiles)
@@ -173,30 +206,66 @@ class MolecularDescriptorCalculator:
         # 合并所有描述符
         all_descriptors = {
             'SMILES': smiles,
+            'XYZ_Filename': xyz_filename,
             **descriptors_3d,
             **descriptors_umap
         }
         
         return all_descriptors
     
-    def calculate_descriptors_batch(self, smiles_list):
+    def calculate_descriptors_batch(self, smiles_list, save_xyz=True, info_csv='molecule_info.csv'):
         """
-        批量计算分子描述符
+        批量计算分子描述符并生成XYZ文件
         
         参数:
         smiles_list: SMILES字符串列表
+        save_xyz: 是否保存XYZ文件
+        info_csv: 分子信息CSV文件名
         
         返回:
         包含所有描述符的DataFrame
         """
         results = []
-        for smiles in smiles_list:
+        xyz_info = []
+        
+        for i, smiles in enumerate(smiles_list):
             try:
-                descriptors = self.calculate_descriptors(smiles)
+                descriptors = self.calculate_descriptors(smiles, i, save_xyz)
                 results.append(descriptors)
+                
+                if save_xyz:
+                    xyz_info.append({
+                        'SMILES': smiles,
+                        'XYZ_Filename': descriptors['XYZ_Filename']
+                    })
             except Exception as e:
                 print(f"处理SMILES {smiles} 时出错: {str(e)}")
                 results.append({'SMILES': smiles})  # 保留SMILES即使计算失败
         
+        # 保存分子信息到CSV
+        if save_xyz and xyz_info:
+            df_info = pd.DataFrame(xyz_info)
+            info_path = os.path.join(self.xyz_output_dir, info_csv)
+            df_info.to_csv(info_path, index=False)
+            print(f"分子信息已保存到: {info_path}")
+        
         return pd.DataFrame(results)
+    # 初始化计算器
     
+    
+calculator = MolecularDescriptorCalculator(
+    pca_model_path='descriptors_maker/pca_model.joblib',
+    umap_model_path='descriptors_maker/umap_model.joblib',
+    xyz_output_dir='main\structure'  # 默认保存位置
+)
+
+# 批量处理SMILES列表
+smiles_list = ["CCO", "CCN", "C1=CC=CC=C1", "O=C=O"]
+df_descriptors = calculator.calculate_descriptors_batch(
+    smiles_list,
+    save_xyz=True,
+    info_csv='molecule_info.csv'
+)
+
+# 查看结果
+print(df_descriptors.head())
