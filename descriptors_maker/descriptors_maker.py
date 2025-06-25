@@ -11,12 +11,11 @@ import math
 
 class MolecularDescriptorCalculator:
     def __init__(self, 
-                 pca_model_path='pca_model.joblib', 
-                 umap_model_path='umap_model.joblib',
+                 pca_model_path=r'descriptors_maker\pca_model.joblib', 
+                 umap_model_path=r'descriptors_maker\umap_model.joblib',
                  xyz_output_dir='xyz_molecules'):
         """
         分子描述符计算器
-        
         参数:
         pca_model_path: PCA模型文件路径
         umap_model_path: UMAP模型文件路径
@@ -250,22 +249,5 @@ class MolecularDescriptorCalculator:
             print(f"分子信息已保存到: {info_path}")
         
         return pd.DataFrame(results)
-    # 初始化计算器
-    
-    
-calculator = MolecularDescriptorCalculator(
-    pca_model_path='descriptors_maker/pca_model.joblib',
-    umap_model_path='descriptors_maker/umap_model.joblib',
-    xyz_output_dir='main\structure'  # 默认保存位置
-)
 
-# 批量处理SMILES列表
-smiles_list = ["CCO", "CCN", "C1=CC=CC=C1", "O=C=O"]
-df_descriptors = calculator.calculate_descriptors_batch(
-    smiles_list,
-    save_xyz=True,
-    info_csv='molecule_info.csv'
-)
-
-# 查看结果
-print(df_descriptors.head())
+    

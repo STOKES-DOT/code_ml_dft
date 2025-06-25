@@ -1,156 +1,299 @@
 import os
 import re
 import shutil
+import subprocess
+import logging
 from pathlib import Path
+from typing import List, Tuple, Optional, Dict
 
-def generate_gaussian_inputs(template_path, structure_folder):
-    """
-    Generate Gaussian input files based on a template and XYZ structure files.
-    
-    Args:
-        template_path (str): Path to the template GJF file
-        structure_folder (str): Path to the folder containing XYZ structure files
+class GaussianInputGenerator:
+    def __init__(self, 
+                 gjf_template: str = r"descriptors_maker_QM\template_QM.gjf",
+                 slurm_template: str = r"descriptors_maker_QM\test_1.slurm",
+                 structure_folder: str = r"xyz_molecules",
+                 output_dir: str = ".",
+                 overwrite: bool = False,
+                 dry_run: bool = False):
+        """
+        Initialize Gaussian input file generator
         
-    Returns:
-        list: Paths to the generated GJF files
-    """
-    # Validate template file existence
-    template_path = Path(template_path)
-    if not template_path.exists():
-        raise FileNotFoundError(f"Error: Template file {template_path} not found")
-    
-    # Validate structure folder existence
-    structure_folder = Path(structure_folder)
-    if not structure_folder.exists() or not structure_folder.is_dir():
-        raise NotADirectoryError(f"Error: Structure folder {structure_folder} not found")
-    
-    # Find all XYZ structure files
-    xyz_files = list(structure_folder.glob("job_*.xyz"))
-    if not xyz_files:
-        raise FileNotFoundError(f"Error: No XYZ files found in {structure_folder}")
-    
-    print(f"Found {len(xyz_files)} structure files. Processing...")
-    
-    generated_files = []
-    
-    for xyz_file in xyz_files:
-        # Extract task number from filename
-        match = re.search(r'job_(\d+)\.xyz', xyz_file.name)
-        if not match:
-            print(f"Warning: Skipping file with unexpected name: {xyz_file.name}")
-            continue
+        Args:
+            gjf_template: Gaussian template file path
+            slurm_template: SLURM template file path
+            structure_folder: XYZ structure files directory
+            output_dir: Directory to save generated files
+            overwrite: Overwrite existing files
+            dry_run: Simulate operations without writing files
+        """
+        self.gjf_template = Path(gjf_template).resolve()
+        self.slurm_template = Path(slurm_template).resolve()
+        self.structure_folder = Path(structure_folder).resolve()
+        self.output_dir = Path(output_dir).resolve()
+        self.overwrite = overwrite
+        self.dry_run = dry_run
+        
+        # Setup logging
+        logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+        self.logger = logging.getLogger('GaussianInputGenerator')
+        
+        # Create output directory if needed
+        if not self.dry_run:
+            self.output_dir.mkdir(parents=True, exist_ok=True)
+
+    def validate_paths(self) -> None:
+        """Validate all input paths exist"""
+        if not self.gjf_template.exists():
+            raise FileNotFoundError(f"GJF template not found: {self.gjf_template}")
+        if not self.slurm_template.exists():
+            raise FileNotFoundError(f"SLURM template not found: {self.slurm_template}")
+        if not self.structure_folder.exists():
+            raise NotADirectoryError(f"Structure folder not found: {self.structure_folder}")
+
+    def generate_gaussian_inputs(self, 
+                                template_path: Optional[str] = None, 
+                                structure_folder: Optional[str] = None
+                                ) -> List[str]:
+        """
+        Generate Gaussian input files
+        
+        Args:
+            template_path: Override GJF template path
+            structure_folder: Override XYZ structure folder
             
-        task_number = match.group(1)
-        base_name = f"job_{task_number}_g16"
-        gjf_file = base_name + ".gjf"
+        Returns:
+            Paths to generated GJF files
+        """
+        template = Path(template_path).resolve() if template_path else self.gjf_template
+        structures = Path(structure_folder).resolve() if structure_folder else self.structure_folder
         
-        # Copy template file
-        shutil.copy(template_path, gjf_file)
-        print(f"Created: {gjf_file}")
+        # Validate paths
+        for path in [template, structures]:
+            if not path.exists():
+                raise FileNotFoundError(f"Path not found: {path}")
+
+        # Find XYZ files
+        xyz_files = list(structures.glob("job_*.xyz"))
+        if not xyz_files:
+            raise FileNotFoundError(f"No XYZ files found in {structures}")
+        self.logger.info(f"Found {len(xyz_files)} XYZ files")
+
+        generated_files = []
         
-        # Read template content
-        with open(gjf_file, 'r') as f:
-            content = f.read()
-        
-        # Update CHK file paths
-        updated_content = content.replace("%chk=_n.chk", f"%chk={base_name}_n.chk")
-        updated_content = updated_content.replace("%chk=_o.chk", f"%chk={base_name}.chk")
-        updated_content = updated_content.replace("%ochk=_o.chk", f"%ochk={base_name}.chk")
-        
-        # Read XYZ coordinates (skip first two lines)
-        with open(xyz_file, 'r') as f:
-            xyz_lines = f.readlines()[2:]
-        
-        # Split template content at the link1 separator
-        parts = updated_content.split("--link1--")
-        if len(parts) < 2:
-            print(f"Warning: '--link1--' separator not found in {gjf_file}")
-            continue
+        # Read template once
+        with open(template, 'r') as f:
+            template_content = f.read()
+
+        for xyz_file in xyz_files:
+            # Extract task number
+            if not (match := re.search(r'job_(\d+)\.xyz', xyz_file.name)):
+                self.logger.warning(f"Skipping invalid XYZ file: {xyz_file.name}")
+                continue
+                
+            task_number = match.group(1)
+            base_name = f"job_{task_number}_g16"
+            gjf_file = self.output_dir / (base_name + ".gjf")
             
-        # Rebuild file content with coordinates inserted
-        new_content = (
-            parts[0].rstrip() + "\n" +  # First section (before coordinates)
-            "".join(xyz_lines).strip() + "\n\n" +  # XYZ coordinates
-            "--link1--" + parts[1]  # Second section (after coordinates)
-        )
-        
-        # Write updated content
-        with open(gjf_file, 'w') as f:
-            f.write(new_content)
-        
-        print(f"  - Optimization CHK: {base_name}.chk")
-        print(f"  - TDDFT CHK: {base_name}_TDDFT.chk")
-        generated_files.append(gjf_file)
-    
-    print(f"Operation completed. Successfully generated {len(generated_files)} Gaussian input files.")
-    return generated_files
+            # Skip existing files
+            if gjf_file.exists() and not self.overwrite:
+                self.logger.info(f"Skipping existing file: {gjf_file.name}")
+                continue
+                
+            # Process template
+            content = template_content
+            content = content.replace("%chk=_n.chk", f"%chk={base_name}_TDDFT.chk")
+            content = content.replace("%chk=_o.chk", f"%chk={base_name}.chk")
+            content = content.replace("%ochk=_o.chk", f"%ochk={base_name}.chk")
+            
+            # Insert coordinates
+            with open(xyz_file, 'r') as f:
+                xyz_data = ''.join(f.readlines()[2:]).strip()
+                
+            # Use regex to find insertion point
+            if "--link1--" not in content:
+                self.logger.warning(f"Missing '--link1--' separator in template")
+                continue
+                
+            parts = content.split("--link1--", 1)
+            new_content = f"{parts[0].rstrip()}\n{xyz_data}\n\n--link1--{parts[1]}"
+            
+            # Write output
+            if not self.dry_run:
+                with open(gjf_file, 'w') as f:
+                    f.write(new_content)
+                self.logger.info(f"Created Gaussian input: {gjf_file.name}")
+            else:
+                self.logger.info(f"[DRY RUN] Would create: {gjf_file.name}")
+                
+            generated_files.append(str(gjf_file))
+            
+        self.logger.info(f"Generated {len(generated_files)} Gaussian inputs")
+        return generated_files
 
-def generate_slurm_scripts(template_path):
-    """
-    Generate SLURM submission scripts based on a template.
-    
-    Args:
-        template_path (str): Path to the template SLURM file
+    def generate_slurm_scripts(self, 
+                              template_path: Optional[str] = None
+                              ) -> List[str]:
+        """
+        Generate SLURM submission scripts
         
-    Returns:
-        list: Paths to the generated SLURM files
-    """
-    template_path = Path(template_path)
-    if not template_path.exists():
-        raise FileNotFoundError(f"Error: Template file {template_path} not found")
-    
-    # Find all GJF files in current directory
-    gjf_files = list(Path.cwd().glob("*.gjf"))
-    if not gjf_files:
-        print("Warning: No GJF files found in current directory")
-        return []
-    
-    generated_files = []
-    
-    # Read template content
-    with open(template_path, 'r') as f:
-        template_content = f.read()
-    
-    for gjf_file in gjf_files:
-        # Derive job name from GJF filename
-        job_name = gjf_file.stem
-        slurm_file = job_name + ".slurm"
+        Args:
+            template_path: Override SLURM template path
+            
+        Returns:
+            Paths to generated SLURM files
+        """
+        template = Path(template_path).resolve() if template_path else self.slurm_template
         
-        # Replace job name placeholder
-        new_content = template_content.replace("jobname1", job_name)
+        if not template.exists():
+            raise FileNotFoundError(f"SLURM template not found: {template}")
+            
+        gjf_files = list(self.output_dir.glob("*.gjf"))
+        if not gjf_files:
+            self.logger.warning("No GJF files found for SLURM generation")
+            return []
+            
+        generated_files = []
         
-        # Write SLURM file
-        with open(slurm_file, 'w') as f:
-            f.write(new_content)
-        
-        print(f"Generated SLURM script: {slurm_file}")
-        generated_files.append(slurm_file)
-    
-    print(f"Operation completed. Generated {len(generated_files)} SLURM scripts.")
-    return generated_files
+        # Read template once
+        with open(template, 'r') as f:
+            template_content = f.read()
 
-def main():
-    """Main function demonstrating workflow execution"""
-    try:
-        # Step 1: Generate Gaussian input files
-        gjf_files = generate_gaussian_inputs(
-            template_path="test.gjf",
-            structure_folder="../../main/structure"
-        )
+        for gjf_file in gjf_files:
+            job_name = gjf_file.stem
+            slurm_file = self.output_dir / (job_name + ".slurm")
+            
+            if slurm_file.exists() and not self.overwrite:
+                self.logger.info(f"Skipping existing SLURM script: {slurm_file.name}")
+                continue
+                
+            # Customize template
+            content = template_content.replace("jobname1", job_name)
+            
+            if not self.dry_run:
+                with open(slurm_file, 'w') as f:
+                    f.write(content)
+                self.logger.info(f"Created SLURM script: {slurm_file.name}")
+            else:
+                self.logger.info(f"[DRY RUN] Would create SLURM: {slurm_file.name}")
+                
+            generated_files.append(str(slurm_file))
+            
+        self.logger.info(f"Generated {len(generated_files)} SLURM scripts")
+        return generated_files
+
+    def submit_slurm_jobs(self, 
+                         directory: Optional[str] = None,
+                         pattern: str = "*.slurm"
+                         ) -> Dict[str, str]:
+        """
+        Submit all SLURM scripts in the specified directory
         
-        # Step 2: Generate SLURM scripts (if GJF files were created)
-        if gjf_files:
-            slurm_files = generate_slurm_scripts(
-                template_path="test_1.slurm"
+        Args:
+            directory: Directory containing SLURM scripts (default: output_dir)
+            pattern: File pattern to match SLURM scripts
+            
+        Returns:
+            Dictionary mapping script paths to submission outputs
+        """
+        target_dir = Path(directory) if directory else self.output_dir
+        if not target_dir.exists():
+            raise NotADirectoryError(f"Directory not found: {target_dir}")
+            
+        slurm_scripts = list(target_dir.glob(pattern))
+        if not slurm_scripts:
+            self.logger.warning(f"No SLURM scripts found in {target_dir} with pattern '{pattern}'")
+            return {}
+            
+        results = {}
+        self.logger.info(f"Submitting {len(slurm_scripts)} SLURM jobs...")
+        
+        for script in slurm_scripts:
+            if self.dry_run:
+                self.logger.info(f"[DRY RUN] Would submit: {script.name}")
+                results[str(script)] = "Dry run - no submission"
+                continue
+                
+            try:
+                result = subprocess.run(
+                    ["sbatch", str(script)],
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+                output = result.stdout.strip()
+                self.logger.info(f"Submitted {script.name}: {output}")
+                results[str(script)] = output
+            except subprocess.CalledProcessError as e:
+                error_msg = f"Submission failed for {script.name}: {e.stderr.strip()}"
+                self.logger.error(error_msg)
+                results[str(script)] = error_msg
+            except Exception as e:
+                error_msg = f"Unexpected error submitting {script.name}: {str(e)}"
+                self.logger.error(error_msg)
+                results[str(script)] = error_msg
+                
+        self.logger.info(f"Submitted {len(results)} jobs")
+        return results
+
+    def run_workflow(self, 
+                    gjf_template: Optional[str] = None, 
+                    structure_folder: Optional[str] = None, 
+                    slurm_template: Optional[str] = None,
+                    submit_jobs: bool = False
+                    ) -> Tuple[List[str], List[str], Dict[str, str]]:
+        """
+        Execute complete workflow
+        
+        Args:
+            submit_jobs: Automatically submit SLURM jobs after generation
+            
+        Returns:
+            Tuple of (GJF paths, SLURM paths, submission results)
+        """
+        try:
+            self.validate_paths()
+            
+            # Generate Gaussian inputs
+            gjf_files = self.generate_gaussian_inputs(
+                template_path=gjf_template,
+                structure_folder=structure_folder
             )
-        else:
-            print("Skipping SLURM script generation as no GJF files were created.")
-        
-        print("\nAll operations completed successfully.")
-        
-    except Exception as e:
-        print(f"Error: {str(e)}")
-        print("Operation aborted due to errors.")
+            
+            # Generate SLURM scripts
+            slurm_files = self.generate_slurm_scripts(
+                template_path=slurm_template
+            ) if gjf_files else []
+            
+            # Submit jobs if requested
+            submission_results = {}
+            if submit_jobs and slurm_files:
+                submission_results = self.submit_slurm_jobs()
+            
+            self.logger.info("Workflow completed successfully")
+            return gjf_files, slurm_files, submission_results
+            
+        except Exception as e:
+            self.logger.error(f"Workflow failed: {str(e)}", exc_info=True)
+            return [], [], {}
 
+
+# Example usage
 if __name__ == "__main__":
-    main()
+    # Create generator with custom options
+    generator = GaussianInputGenerator(
+        gjf_template=r"descriptors_maker_QM\template_QM.gjf",
+        slurm_template=r"descriptors_maker_QM\test_1.slurm",
+        structure_folder=r"xyz_molecules",
+        output_dir="gaussian_jobs",
+        overwrite=False,
+        dry_run=False
+    )
+    
+    # Run full workflow with job submission
+    gjf_files, slurm_files, submission_results = generator.run_workflow(
+        submit_jobs=True
+    )
+    
+    # Alternatively run individual steps
+    # gjf_files = generator.generate_gaussian_inputs()
+    # slurm_files = generator.generate_slurm_scripts()
+    # submission_results = generator.submit_slurm_jobs()
