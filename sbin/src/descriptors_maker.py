@@ -11,8 +11,8 @@ import math
 
 class MolecularDescriptorCalculator:
     def __init__(self, 
-                 pca_model_path=r'descriptors_maker\pca_model.joblib', 
-                 umap_model_path=r'descriptors_maker\umap_model.joblib',
+                 pca_model_path=r'pca_model.joblib', 
+                 umap_model_path=r'umap_model.joblib',
                  xyz_output_dir='xyz_molecules'):
         """
         分子描述符计算器

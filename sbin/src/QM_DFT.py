@@ -85,9 +85,11 @@ class GaussianInputGenerator:
 
         for xyz_file in xyz_files:
             # Extract task number
-            if not (match := re.search(r'job_(\d+)\.xyz', xyz_file.name)):
-                self.logger.warning(f"Skipping invalid XYZ file: {xyz_file.name}")
-                continue
+            match = re.search(r'job_(\d+)\.xyz', xyz_file.name)
+            if not match:
+                print("No match found")
+            else:
+                print(f"Match found: {match.group(1)}")
                 
             task_number = match.group(1)
             base_name = f"job_{task_number}_g16"

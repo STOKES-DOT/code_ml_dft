@@ -5,7 +5,7 @@ from sys import platform
 
 # Package metadata
 NAME = 'optxc'
-VERSION = '1.0.0-beta'
+VERSION = '1.0.0'
 DESCRIPTION = 'Exchange-Correlation Optimization Tool'
 AUTHOR = 'Yuan Jiao'
 EMAIL = 'jiaoyuan24@mails.ucas.ac.cn '
@@ -15,9 +15,10 @@ LICENSE = 'UCAS,SAIS'
 # Dependencies
 INSTALL_REQUIRES = [
     'pandas>=1.3.0',
-    'scikit-learn>=1.0.0',
-    'joblib>=1.0.0',
-    'rdkit-pypi>=2021.9.4'
+    'scikit-learn>= 1.3.0',
+    'joblib>=1.2.0',
+    'rdkit>=2023.9.2',
+    'umap-learn>=0.5.7'
 ]
 
 # Platform-specific configurations
