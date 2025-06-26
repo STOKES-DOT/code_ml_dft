@@ -1,3 +1,11 @@
+    .::::     .:::::::  .::: .::::::.::      .::    .::   
+  .::    .::  .::    .::     .::     .::   .::   .::   .::
+.::        .::.::    .::     .::      .:: .::   .::       
+.::        .::.:::::::       .::        .::     .::       
+.::        .::.::            .::      .:: .::   .::       
+  .::     .:: .::            .::     .::   .::   .::   .::
+    .::::     .::            .::    .::      .::   .::::    .::
+
 ## Key Functions
 
 * Transforming SMILES into .xyz and calculating descriptors for XC functionals optimization
