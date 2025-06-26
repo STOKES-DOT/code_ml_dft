@@ -6,7 +6,7 @@
 .::        .::.:::::::       .::        .::     .::       
 .::        .::.::            .::      .:: .::   .::       
   .::     .:: .::            .::     .::   .::   .::   .::
-    .::::     .::            .::    .::      .::   .::::    .::
+    .::::     .::            .::    .::      .::   .::::    ::
 </pre>
 </center>
 ## Key Functions
@@ -27,8 +27,18 @@ $ git clone https://github.com/STOKES-DOT/code_ml_dft
 $ cd code_ml_dft
 
 ```
-## OPTXC Installation
 
+You can install the OPTXC package using the following command:
+
+```bash
+# Go into the OPTXC folder
+$ cd sbin
+
+# Install the OPTXC package
+$ python setup.py install
+
+```
+Attenation: The setpy.py needs to be run within internet connection. If you have no internet connection, you can't install the OPTXC package. The python version should be 3.6 or higher. The final stacking model is not training. You can find the trianing code in SGM folder such as SGM_LC-wPBE folder. Don't forget to change the base-learners and training date path in the training code.
 ## XC functionals optimization
 
 To optimize the XC functionals of a given molecule, you can use the following code in example folder:
@@ -38,8 +48,16 @@ To optimize the XC functionals of a given molecule, you can use the following co
 $ cd example
 
 # You can use the following code to optimize the XC functionals of a given molecule with a given initial guess
-$ python optimize_xc.py --smiles "C" --xc "LC-wPBE" --basis "6-31G" --initial_guess "LC-wPBE"
+$ optxc example.inp
+```
 
+The input file `example.inp` should contain the following information:
+```bash
+#INPUT_FILE=example.inp THIS IS AN EXAMPLE INPUT FILE. YOU COULD EDIT IT ACCORDING TO YOUR NEEDS.
+SMILES = C1=CC=C(C=C1)C2=CC=CC=C2 # SMILES of the molecule
+XC_FUNCTIONAL = LC-wPBE # XC functional to be optimized, Now this package only supports LC-wPBE and wB97XD functionals
+OPT_MODEL = XBGOOST # Optimization model, Now this package supports XGBoost, Random Forest, Gradient Boosting models,CatBoost models, and some other models.
+SLURM_PATH = descriptors_maker_QM\test_1.slurm # SLURM file path for generating Gaussian tasks, You can generate the slurm file using the script in the descriptors_maker_QM folder.
 ```
 ## Transforming SMILES into .xyz and calculating descriptors for XC functionals optimization
 This code will generate a .xyz file for the given molecule, and then optimize the XC functionals using the given initial guess. The optimized XC functionals will be saved in the same folder with the initial guess.
