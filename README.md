@@ -77,7 +77,7 @@ This code uses the following open source packages (We have listed in the project
 
 ## Support
 
-If you like this project and think it has helped in any way, Sent me 2.5$ for a cup of coffee! Just a joke, but it's always nice to give back to the community. Have a great day!
+If you like this project and think it has helped in any way, Sent me 2.5$ for a cup of coffee! Just a joke, haha~. Have a great day!
 
 
 ## DFT computational program for strongly correlated system based on neural network
