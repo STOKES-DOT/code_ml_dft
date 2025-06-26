@@ -9,6 +9,7 @@ import joblib
 import pandas as pd
 import time
 import os
+from glob import glob
 
 def parse_input_file(input_file):
     config = {}
@@ -108,13 +109,16 @@ if __name__ == "__main__":
     with open(r'example\example.out', 'w') as f:
         # ASCII Art Header
         f.write("""
-  ___  _____  _____  _   _   ___   __
- / _ \|  _  ||_   _|| | | | / _ \ / _|
-| | | | | | |  | |  | |_| |/ /_\ \\\ \ 
-| | | | | | |  | |  |  _  ||  _  | |_ |
-| |_| \ \_/ /  | |  | | | || | | ||  _|
- \___/ \___/   \_/  \_| |_/\_| |_/|_|  
-Exchange-Correlation Optimization Report
+    .::::     .:::::::  .::: .::::::.::      .::    .::   
+  .::    .::  .::    .::     .::     .::   .::   .::   .::
+.::        .::.::    .::     .::      .:: .::   .::       
+.::        .::.:::::::       .::        .::     .::       
+.::        .::.::            .::      .:: .::   .::       
+  .::     .:: .::            .::     .::   .::   .::   .::
+    .::::     .::            .::    .::      .::   .::::    .::
+  
+    
+  \n Exchange-Correlation Optimization Output
 =======================================\n\n""")
         
         # Input validation report
@@ -191,8 +195,24 @@ Exchange-Correlation Optimization Report
             f.write(f"Error in QM descriptors calculation: {str(e)}\n")
         print(f"Error in QM descriptors calculation: {str(e)}")
         sys.exit(1)
-    
-    # Descriptors merging
+
+
+
+# 定义要删除的文件模式列表
+    patterns = ["job_*.xyz", "*.gjf", "*.slurm"]
+
+# 收集所有匹配的文件路径
+    remove_files = []
+    for pattern in patterns:
+        remove_files.extend(glob(pattern))  # 直接使用glob搜索当前目录
+
+# 删除所有匹配的文件
+    for file_path in remove_files:
+        try:
+            os.remove(file_path)
+            print(f"已删除: {file_path}")
+        except Exception as e:
+            print(f"删除失败 {file_path}: {str(e)}")
     try:
         descriptors = pd.concat([qm_descriptors, classic_descriptors], axis=1)
     except Exception as e:
@@ -332,5 +352,8 @@ Exchange-Correlation Optimization Report
         
         # Footer
         f.write("\n[ END OF REPORT ]\n")
-        f.write("\n The complete code is available at https://github.com/STOKES-DOT/code_ml_dft. You can edit the codes for your own needs. Good Luck! Don't forget to sent me 2.5$ for a cup of coffee! Just a joke, but I appreciate it (Doge). Have a great day!\n")
+        f.write("\n The complete code is available at https://github.com/STOKES-DOT/code_ml_dft. \n ")
+        f.write("\n You can edit the codes for your own needs. \n")
+        f.write("\n Don't forget to sent me 2.5$ for a cup of coffee! Just a joke, but I appreciate it (Doge). \n")
+        f.write("\n Have a great day! \n")
         f.write("=======================================")

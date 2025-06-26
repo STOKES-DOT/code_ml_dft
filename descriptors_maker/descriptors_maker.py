@@ -130,6 +130,7 @@ class MolecularDescriptorCalculator:
         
         # 计算摩尔折射率
         mol_mr = Descriptors.MolMR(mol)
+        tpsa = Descriptors.TPSA(mol)
         
         return {
             'PMI1': pmi1,
@@ -147,7 +148,8 @@ class MolecularDescriptorCalculator:
             'Gasteiger_Charge_Std': gast_charge_std,
             'EState_Mean': estate_mean,
             'EState_Std': estate_std,
-            'MolMR': mol_mr
+            'MolMR': mol_mr,
+            'TPSA': tpsa
         }
     
     def _calculate_umap_descriptors(self, smiles):
