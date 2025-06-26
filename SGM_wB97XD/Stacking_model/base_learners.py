@@ -536,7 +536,7 @@ final_model.fit(x_train, y_train)
 y_pred = final_model.predict(x_test)
 test_mse = mean_squared_error(y_test, y_pred)
 print(f"Test MSE with Best AdaBoost Model: {test_mse}")
-joblib.dump(final_model, 'final_adaboost_wb97xd.pkl')
+joblib.dump(final_model, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/final_adaboost_wb97xd.pkl')
 
 # 定义目标函数
 def objective_rf(trial):
