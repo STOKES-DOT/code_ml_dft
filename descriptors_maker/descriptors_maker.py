@@ -204,8 +204,6 @@ class MolecularDescriptorCalculator:
         
         # 合并所有描述符
         all_descriptors = {
-            'SMILES': smiles,
-            'XYZ_Filename': xyz_filename,
             **descriptors_3d,
             **descriptors_umap
         }
