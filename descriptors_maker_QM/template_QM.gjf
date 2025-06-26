@@ -1,0 +1,18 @@
+%chk=_o.chk
+#p opt b3lyp/6-31g** 
+
+title:opt
+
+0 1
+
+
+
+--link1--
+%ochk=_o.chk
+%chk=_n.chk
+#p tpssh/aug-cc-pVDZ  geom=check    
+
+title:tddft
+
+0 1
+

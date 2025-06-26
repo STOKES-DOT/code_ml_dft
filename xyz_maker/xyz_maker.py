@@ -1,48 +1,104 @@
-import rdkit as rd
+import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import AllChem
-from rdkit.Chem import Draw
-import pandas as pd
-from rdkit.Chem.Draw import rdMolDraw2D
-from PIL import Image
 import os
-import io
-import math
 
-def read_excel_string(file_path, sheet_name=0, usecols=None):
-    try:
-        # 使用pandas的read_excel函数读取数据
-        df = pd.read_excel(file_path, sheet_name=sheet_name, usecols=usecols)
-        return df
-    except Exception as e:
-        # 如果发生异常，打印错误信息
-        print(f"Error reading Excel file: {e}")
-        return None
-TADF_smi = pd.read_csv('xyz_maker\SMILES.csv', usecols=['SMILES'])
-
-print(TADF_smi)
-
-# 提取 'SMILES' 列
-TADF_smi = TADF_smi['SMILES'].tolist()
-result = []
-
-for i, smi in enumerate(TADF_smi):
-    mol = Chem.MolFromSmiles(smi)
-    if mol is not None:
-        mol = Chem.AddHs(mol)  # 添加显式氢原子
-        state = AllChem.EmbedMolecule(mol, useRandomCoords=True)  # 为分子生成3D构象
-        num_atoms = mol.GetNumAtoms()
-        AllChem.MMFFOptimizeMolecule(mol)  # 优化分子
-        mol_filename = fr"xyz_maker\xyz_molecules\job_{i+1}.xyz"
-        Chem.MolToXYZFile(mol, mol_filename)
-        print(f"Saved XYZ file: {mol_filename}")
-        result.append({"SMILES": smi, "Mol_File": mol_filename})
-
-# 将结果保存到Excel文件
-df_result = pd.DataFrame(result)
-excel_output_path = r"xyz_maker\xyz_molecules\molecule_info.csv"
-df_result.to_csv(excel_output_path, index=False)
-
-print(f"处理完成，结果已保存到 {excel_output_path}")
+class XYZGenerator:
+    def __init__(self, output_dir='xyz_molecules'):
+        """
+        XYZ File Generator
         
+        Parameters:
+        output_dir: Directory path for saving XYZ files
+        """
+        self.output_dir = output_dir
+        # Create output directory if it doesn't exist
+        os.makedirs(self.output_dir, exist_ok=True)
     
+    def generate_xyz(self, smiles, index=0):
+        """
+        Generate XYZ file for a single molecule
+        
+        Parameters:
+        smiles: SMILES string
+        index: Molecule index (for filename generation)
+        
+        Returns:
+        Absolute path to the generated XYZ file
+        """
+        # Convert SMILES to RDKit molecule object
+        mol = Chem.MolFromSmiles(smiles)
+        if mol is None:
+            raise ValueError(f"Invalid SMILES string: {smiles}")
+        
+        # Add hydrogens and generate 3D coordinates
+        mol = Chem.AddHs(mol)
+        state = AllChem.EmbedMolecule(mol, useRandomCoords=True)
+        if state == -1:
+            raise RuntimeError(f"Failed to generate 3D coordinates for SMILES: {smiles}")
+        
+        # Optimize molecular geometry using MMFF force field
+        AllChem.MMFFOptimizeMolecule(mol)
+        
+        # Generate filename based on index or SMILES hash
+        if index is None:
+            # Use SMILES hash as filename if index not provided
+            filename = f"molecule_{abs(hash(smiles))}.xyz"
+        else:
+            filename = f"job_{index+1}.xyz"
+        
+        # Save XYZ file
+        xyz_path = os.path.join(self.output_dir, filename)
+        Chem.MolToXYZFile(mol, xyz_path)
+        
+        return os.path.abspath(xyz_path)
+    
+    def generate_xyz_batch(self, smiles_list):
+        """
+        Batch generate XYZ files for multiple molecules
+        
+        Parameters:
+        smiles_list: List of SMILES strings
+        
+        Returns:
+        List of absolute paths to generated XYZ files
+        """
+        results = []
+        
+        for i, smiles in enumerate(smiles_list):
+            try:
+                # Generate XYZ file for current SMILES
+                xyz_path = self.generate_xyz(smiles, i)
+                results.append(xyz_path)
+                print(f"Saved XYZ file: {xyz_path}")
+            except Exception as e:
+                # Handle errors while keeping process running
+                print(f"Error processing SMILES {smiles}: {str(e)}")
+                results.append(None)
+        
+        return results
+
+    def generate_xyz_from_csv(self, csv_path, smiles_column='SMILES'):
+        """
+        Generate XYZ files from SMILES in a CSV file
+        
+        Parameters:
+        csv_path: Path to input CSV file
+        smiles_column: Column name containing SMILES strings
+        
+        Returns:
+        List of absolute paths to generated XYZ files
+        """
+        try:
+            # Read input CSV file
+            df = pd.read_csv(csv_path)
+            if smiles_column not in df.columns:
+                raise ValueError(f"Column not found in CSV file: {smiles_column}")
+            
+            # Extract SMILES list and generate XYZ files
+            smiles_list = df[smiles_column].tolist()
+            return self.generate_xyz_batch(smiles_list)
+        except Exception as e:
+            # Handle file reading errors
+            print(f"Error reading CSV file: {str(e)}")
+            return []
