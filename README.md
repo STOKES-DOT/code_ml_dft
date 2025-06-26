@@ -1,3 +1,14 @@
+<center>
+<pre>
+    .::::     .:::::::  .::: .::::::.::      .::    .::   
+  .::    .::  .::    .::     .::     .::   .::   .::   .::
+.::        .::.::    .::     .::      .:: .::   .::       
+.::        .::.:::::::       .::        .::     .::       
+.::        .::.::            .::      .:: .::   .::       
+  .::     .:: .::            .::     .::   .::   .::   .::
+    .::::     .::            .::    .::      .::   .::::    .::
+</pre>
+</center>
 ## Key Functions
 
 * Transforming SMILES into .xyz and calculating descriptors for XC functionals optimization
@@ -16,6 +27,8 @@ $ git clone https://github.com/STOKES-DOT/code_ml_dft
 $ cd code_ml_dft
 
 ```
+## OPTXC Installation
+
 ## XC functionals optimization
 
 To optimize the XC functionals of a given molecule, you can use the following code in example folder:
