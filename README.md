@@ -13,7 +13,7 @@
 ## Key Functions
 
 * Transforming SMILES into .xyz and calculating descriptors for XC functionals optimization
-* Machine Learning Model for XC functionals optimization when calculating the charge-transfer excited or local excited state of singe molecular systems in TDDFT
+* Machine Learning Model for XC functionals optimization when calculating the charge-transfer excited or local excited state of single molecular systems in TDDFT
 * Scripts for batch generation of Gaussian tasks before and after optimization of XC functionals
 
 ## How To Use
