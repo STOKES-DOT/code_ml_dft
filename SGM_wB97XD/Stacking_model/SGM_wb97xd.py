@@ -199,7 +199,7 @@ base_learners = [
 
 def objective(trial):
     # 定义超参数搜索空间
-    X_sampled, y_sampled = x_train[:800], y_train[:800]
+    X_sampled, y_sampled = x_train[:1800], y_train[:1800]
     
     # BayesianRidge 的超参数
     alpha_1 = trial.suggest_float('alpha_1', 1e-99, 1e-5, log=True)
@@ -260,7 +260,8 @@ for name, estimator, estimator_type in base_learners_info:
 
 # 创建 Optuna 研究
 study = optuna.create_study(direction='minimize', 
-                            pruner=optuna.pruners.MedianPruner(), 
+                            pruner=optuna.pruners.MedianPruner(), # 使用中位数剪枝
+                            sampler=optuna.samplers.TPESampler(seed=42) # 使用 TPE 采样器
                          )
 study.optimize(objective, n_trials=20, show_progress_bar=True, n_jobs=-1)
 

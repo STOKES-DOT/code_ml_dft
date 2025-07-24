@@ -126,6 +126,10 @@ scaler = StandardScaler()
 
 # 重新划分数据集
 x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=5)
+test_data = pd.concat([x_test, y_test], axis=1)
+test_data.to_csv(r'/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/Stacking_model/test_data_wb97xd.csv', index=False)
+
+# 定义模型
 
 def interpolate_samples(X, y, n_samples=300, k=20):
     """
@@ -218,7 +222,7 @@ def objective_xgb(trial):
     return mse
 
 # Create an Optuna study and optimize
-study = optuna.create_study(direction='minimize')
+study = optuna.create_study(direction='minimize',sampler=optuna.samplers.TPESampler(seed=42))
 study.optimize(objective_xgb, n_trials=200, show_progress_bar=True)
 
 # Get the best parameters
@@ -281,7 +285,7 @@ def objective_lgb(trial):
     return np.mean(mse_scores)
 
 # 优化过程
-study_lgb = optuna.create_study(direction='minimize')
+study_lgb = optuna.create_study(direction='minimize',sampler=optuna.samplers.TPESampler(seed=42))
 study_lgb.optimize(objective_lgb, n_trials=30, show_progress_bar=True)
 
 # Get the best parameters
@@ -327,7 +331,7 @@ def objective_gbr(trial):
     return mse
 
 # Optuna优化
-study = optuna.create_study(direction='minimize')
+study = optuna.create_study(direction='minimize',sampler=optuna.samplers.TPESampler(seed=42))
 study.optimize(objective_gbr, n_trials=20, show_progress_bar=True, n_jobs=-1)
 
 # 输出最佳参数
@@ -384,7 +388,7 @@ def objective_lasso(trial):
     return np.mean(mse_scores)
 
 # 优化过程
-study_lasso = optuna.create_study(direction='minimize')
+study_lasso = optuna.create_study(direction='minimize',sampler=optuna.samplers.TPESampler(seed=42))
 study_lasso.optimize(objective_lasso, n_trials=40, show_progress_bar=True)
 
 # 获取最佳参数
@@ -446,7 +450,7 @@ def objective_catboost(trial):
     return np.mean(mse_scores)
 
 # 优化过程
-study_catboost = optuna.create_study(direction='minimize')
+study_catboost = optuna.create_study(direction='minimize',sampler=optuna.samplers.TPESampler(seed=42))
 study_catboost.optimize(objective_catboost, n_trials=20, show_progress_bar=True)
 
 # 获取最佳参数
@@ -508,7 +512,7 @@ def objective_adaboost(trial):
     return np.mean(mse_scores)
 
 # 优化过程
-study_adaboost = optuna.create_study(direction='minimize')
+study_adaboost = optuna.create_study(direction='minimize',sampler=optuna.samplers.TPESampler(seed=42))
 study_adaboost.optimize(objective_adaboost, n_trials=20, show_progress_bar=True)
 
 # 获取最佳参数
@@ -566,7 +570,7 @@ def objective_rf(trial):
     return mse
 
 # 使用Optuna优化
-study = optuna.create_study(direction='minimize')
+study = optuna.create_study(direction='minimize',sampler=optuna.samplers.TPESampler(seed=42))
 study.optimize(objective_rf, n_trials=200, show_progress_bar=True)
 
 # 获取最佳参数
@@ -615,7 +619,7 @@ def objective_ridge(trial):
     return np.mean(mse_scores)
 
 # 优化 Ridge 模型
-study_ridge = optuna.create_study(direction='minimize')
+study_ridge = optuna.create_study(direction='minimize',sampler=optuna.samplers.TPESampler(seed=42))
 study_ridge.optimize(objective_ridge, n_trials=100, show_progress_bar=True)
 best_params_ridge = study_ridge.best_params
 print("Best Ridge parameters:", best_params_ridge)
@@ -662,7 +666,7 @@ def objective_elasticnet(trial):
 
     return np.mean(mse_scores)
 
-study_elasticnet = optuna.create_study(direction='minimize')
+study_elasticnet = optuna.create_study(direction='minimize',sampler=optuna.samplers.TPESampler(seed=42))
 study_elasticnet.optimize(objective_elasticnet, n_trials=50, show_progress_bar=True)
 best_params_elasticnet = study_elasticnet.best_params
 print("Best ElasticNet parameters:", best_params_elasticnet)
