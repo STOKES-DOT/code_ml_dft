@@ -49,7 +49,7 @@ import re
 from scipy.stats import pearsonr
 
 
-Trainning_data = pd.read_csv(r'/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/train_date/training_date_wb97xd.csv')
+Trainning_data = pd.read_csv(r'SGM_wB97XD\train_date\training_date_wB97XD.csv')
 Trainning_data.drop_duplicates(inplace=True)
 Trainning_data.dropna(inplace=True)
 
