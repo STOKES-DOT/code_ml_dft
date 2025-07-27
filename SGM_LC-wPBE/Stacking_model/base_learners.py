@@ -187,6 +187,53 @@ x_train[numeric_features] = scaler.fit_transform(x_train[numeric_features])
 x_test[numeric_features] = scaler.transform(x_test[numeric_features])
 joblib.dump(scaler, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-wPBE/Stacking_model/scaler_LC.pkl')
 
+def objective_elasticnet(trial):
+    params = {
+        'alpha': trial.suggest_loguniform('alpha', 1e-60, 1.0),  # 正则化强度
+        'l1_ratio': trial.suggest_uniform('l1_ratio', 0.0, 1.0),  # L1 和 L2 混合比例
+        'max_iter': trial.suggest_int('max_iter', 100, 1000),  # 最大迭代次数
+        'tol': trial.suggest_loguniform('tol', 1e-30, 1e-2),  # 收敛阈值
+        'fit_intercept': trial.suggest_categorical('fit_intercept', [True, False]),  # 是否拟合截距项
+        'selection': trial.suggest_categorical('selection', ['cyclic', 'random']),  # 特征选择策略
+        'random_state': trial.suggest_int('random_state', 1, 100),  # 随机种子
+    }
+
+    kf = KFold(n_splits=5, shuffle=True, random_state=42)
+    mse_scores = []
+
+    for train_idx, valid_idx in kf.split(x_train):
+        scaler = StandardScaler()
+        X_train_fold = x_train.iloc[train_idx]
+        X_valid_fold = x_train.iloc[valid_idx]
+        y_train_fold = y_train.iloc[train_idx]
+        y_valid_fold = y_train.iloc[valid_idx]
+
+        X_train_scaled = scaler.fit_transform(X_train_fold)
+        X_valid_scaled = scaler.transform(X_valid_fold)
+
+        model = ElasticNet(**params)
+        model.fit(X_train_scaled, y_train_fold)
+        y_pred = model.predict(X_valid_scaled)
+        mse_scores.append(mean_squared_error(y_valid_fold, y_pred))
+
+    return np.mean(mse_scores)
+
+study_elasticnet = optuna.create_study(direction='minimize', sampler=optuna.samplers.TPESampler(seed=42))
+study_elasticnet.optimize(objective_elasticnet, n_trials=50, show_progress_bar=True)
+best_params_elasticnet = study_elasticnet.best_params
+print("Best ElasticNet parameters:", best_params_elasticnet)
+
+final_elasticnet_model = make_pipeline(
+    StandardScaler(),
+    ElasticNet(**best_params_elasticnet)
+)
+final_elasticnet_model.fit(x_train, y_train)
+elasticnet_y_pred = final_elasticnet_model.predict(x_test)
+elasticnet_test_mse = mean_squared_error(y_test, elasticnet_y_pred)
+print(f"Test MSE with Best ElasticNet Model: {elasticnet_test_mse}")
+
+joblib.dump(final_elasticnet_model, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-wPBE/Stacking_model/final_elasticnet_model_LC.pkl')
+
 def objective_xgb(trial):
     params = {
         'objective': 'reg:squarederror',
@@ -328,8 +375,8 @@ def objective_gbr(trial):
     return mse
 
 # Optuna优化
-study = optuna.create_study(direction='minimize', sampler=optuna.samplers.TPESampler(seed=42))
-study.optimize(objective_gbr, n_trials=20, show_progress_bar=True, n_jobs=-1)
+study = optuna.create_study(direction='minimize',pruner=optuna.pruners.MedianPruner()  ,sampler=optuna.samplers.TPESampler(seed=42))
+study.optimize(objective_gbr, n_trials=25, show_progress_bar=True, n_jobs=-1)
 
 # 输出最佳参数
 best_params_gbr = study.best_params
@@ -510,8 +557,8 @@ def objective_adaboost(trial):
     return np.mean(mse_scores)
 
 # 优化过程
-study_adaboost = optuna.create_study(direction='minimize', sampler=optuna.samplers.TPESampler(seed=42))
-study_adaboost.optimize(objective_adaboost, n_trials=20, show_progress_bar=True)
+study_adaboost = optuna.create_study(direction='minimize', pruner=optuna.pruners.MedianPruner() ,sampler=optuna.samplers.TPESampler(seed=42))
+study_adaboost.optimize(objective_adaboost, n_trials=25, show_progress_bar=True)
 
 # 获取最佳参数
 best_params_adaboost = study_adaboost.best_params
@@ -633,49 +680,3 @@ ridge_y_pred = final_ridge_model.predict(x_test)
 ridge_test_mse = mean_squared_error(y_test, ridge_y_pred)
 print(f"Test MSE with Best Ridge Model: {ridge_test_mse}")
 joblib.dump(final_ridge_model, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-wPBE/Stacking_model/final_ridge_model_LC.pkl')
-def objective_elasticnet(trial):
-    params = {
-        'alpha': trial.suggest_loguniform('alpha', 1e-60, 1.0),  # 正则化强度
-        'l1_ratio': trial.suggest_uniform('l1_ratio', 0.0, 1.0),  # L1 和 L2 混合比例
-        'max_iter': trial.suggest_int('max_iter', 100, 1000),  # 最大迭代次数
-        'tol': trial.suggest_loguniform('tol', 1e-60, 1e-2),  # 收敛阈值
-        'fit_intercept': trial.suggest_categorical('fit_intercept', [True, False]),  # 是否拟合截距项
-        'selection': trial.suggest_categorical('selection', ['cyclic', 'random']),  # 特征选择策略
-        'random_state': trial.suggest_int('random_state', 1, 100),  # 随机种子
-    }
-
-    kf = KFold(n_splits=5, shuffle=True, random_state=42)
-    mse_scores = []
-
-    for train_idx, valid_idx in kf.split(x_train):
-        scaler = StandardScaler()
-        X_train_fold = x_train.iloc[train_idx]
-        X_valid_fold = x_train.iloc[valid_idx]
-        y_train_fold = y_train.iloc[train_idx]
-        y_valid_fold = y_train.iloc[valid_idx]
-
-        X_train_scaled = scaler.fit_transform(X_train_fold)
-        X_valid_scaled = scaler.transform(X_valid_fold)
-
-        model = ElasticNet(**params)
-        model.fit(X_train_scaled, y_train_fold)
-        y_pred = model.predict(X_valid_scaled)
-        mse_scores.append(mean_squared_error(y_valid_fold, y_pred))
-
-    return np.mean(mse_scores)
-
-study_elasticnet = optuna.create_study(direction='minimize', sampler=optuna.samplers.TPESampler(seed=42))
-study_elasticnet.optimize(objective_elasticnet, n_trials=50, show_progress_bar=True)
-best_params_elasticnet = study_elasticnet.best_params
-print("Best ElasticNet parameters:", best_params_elasticnet)
-
-final_elasticnet_model = make_pipeline(
-    StandardScaler(),
-    ElasticNet(**best_params_elasticnet)
-)
-final_elasticnet_model.fit(x_train, y_train)
-elasticnet_y_pred = final_elasticnet_model.predict(x_test)
-elasticnet_test_mse = mean_squared_error(y_test, elasticnet_y_pred)
-print(f"Test MSE with Best ElasticNet Model: {elasticnet_test_mse}")
-
-joblib.dump(final_elasticnet_model, '/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-wPBE/Stacking_model/final_elasticnet_model_LC.pkl')

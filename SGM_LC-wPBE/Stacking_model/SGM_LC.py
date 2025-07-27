@@ -175,10 +175,10 @@ scaler = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-wPBE/S
 x_train[numeric_features] = scaler.transform(x_train[numeric_features])
 x_test[numeric_features] = scaler.transform(x_test[numeric_features])
 
+gbr_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-wPBE/Stacking_model/final_gbr_model_LC.pkl')
 xgb_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-wPBE/Stacking_model/final_xgb_model_LC.pkl')
 lgbm_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-wPBE/Stacking_model/final_lgb_model_LC.pkl')
 cat_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-wPBE/Stacking_model/final_catboost_model_LC.pkl')
-gbr_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-wPBE/Stacking_model/final_gbr_model_LC.pkl')
 rf_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-wPBE/Stacking_model/final_rf_model_LC.pkl')
 ada_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-wPBE/Stacking_model/final_adaboost_model_LC.pkl')
 lasso_regressor = joblib.load('/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_LC-wPBE/Stacking_model/final_lasso_model_LC.pkl')

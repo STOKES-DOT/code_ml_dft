@@ -49,7 +49,7 @@ import re
 from scipy.stats import pearsonr
 
 
-Trainning_data = pd.read_csv(r'SGM_wB97XD\train_date\training_date_wB97XD.csv')
+Trainning_data = pd.read_csv(r'/Users/jiaoyuan/Documents/GitHub/code_ml_dft/SGM_wB97XD/train_date/training_date_wB97XD.csv')
 Trainning_data.drop_duplicates(inplace=True)
 Trainning_data.dropna(inplace=True)
 
@@ -261,7 +261,6 @@ for name, estimator, estimator_type in base_learners_info:
 # 创建 Optuna 研究
 study = optuna.create_study(direction='minimize', 
                             pruner=optuna.pruners.MedianPruner(), # 使用中位数剪枝
-                            sampler=optuna.samplers.TPESampler(seed=42) # 使用 TPE 采样器
                          )
 study.optimize(objective, n_trials=20, show_progress_bar=True, n_jobs=-1)
 
