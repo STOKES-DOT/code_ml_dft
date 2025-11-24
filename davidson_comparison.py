@@ -82,7 +82,7 @@ def standard_diagonalization(H, num_eigenvalues=3):
     return eigenvalues[:num_eigenvalues], eigenvectors[:, :num_eigenvalues], elapsed_time
 
 
-def davidson_diagonalization(H, num_eigenvalues=3, max_iterations=1000, tolerance=1e-8):
+def davidson_diagonalization(H, num_eigenvalues=3, max_iterations=1000, tolerance=1e-8, seed=None):
     """
     Perform Davidson diagonalization to find the lowest eigenvalues.
     
@@ -99,6 +99,8 @@ def davidson_diagonalization(H, num_eigenvalues=3, max_iterations=1000, toleranc
         Maximum number of iterations
     tolerance : float
         Convergence tolerance
+    seed : int, optional
+        Random seed for reproducibility of initial guess
         
     Returns:
     --------
@@ -115,6 +117,10 @@ def davidson_diagonalization(H, num_eigenvalues=3, max_iterations=1000, toleranc
     
     n = H.shape[0]
     
+    # Set random seed for reproducibility
+    if seed is not None:
+        np.random.seed(seed)
+    
     # Initialize with random guess vectors
     V = np.random.randn(n, num_eigenvalues) + 1j * np.random.randn(n, num_eigenvalues)
     
@@ -123,6 +129,9 @@ def davidson_diagonalization(H, num_eigenvalues=3, max_iterations=1000, toleranc
     
     eigenvalues = np.zeros(num_eigenvalues, dtype=complex)
     eigenvectors = np.zeros((n, num_eigenvalues), dtype=complex)
+    
+    # Extract diagonal once for use in preconditioner
+    diag_H = np.diag(H)
     
     for iteration in range(max_iterations):
         # Project H onto the subspace spanned by V
@@ -150,7 +159,6 @@ def davidson_diagonalization(H, num_eigenvalues=3, max_iterations=1000, toleranc
         
         for i in range(num_eigenvalues):
             # Simple diagonal preconditioner
-            diag_H = np.diag(H)
             denominator = diag_H - theta[i]
             # Avoid division by zero
             denominator[np.abs(denominator) < 1e-10] = 1e-10

@@ -130,7 +130,7 @@ def print_benchmark_report(results):
     print("-"*80)
     for i, size in enumerate(results['sizes']):
         print(f"{size:<10} {results['max_eigenvalue_diffs'][i]:<25.2e} "
-              f"{results['min_overlaps'][-1]:<25.10f}")
+              f"{results['min_overlaps'][i]:<25.10f}")
     
     print("\n" + "="*80)
     print("NOTES:")
